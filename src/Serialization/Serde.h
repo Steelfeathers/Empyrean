@@ -3,7 +3,7 @@
 namespace Serialization
 {
 	constexpr std::uint32_t Version = 1;
-	inline constexpr std::uint32_t ID = 'TRJT';
+	inline constexpr std::uint32_t ID = 'EMPR';
 
 	void SaveCallback(SKSE::SerializationInterface* a_intfc);
 	void LoadCallback(SKSE::SerializationInterface* a_intfc);

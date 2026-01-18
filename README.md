@@ -7,8 +7,8 @@
 ---
 ### Instructions:
 ```
-git clone https://github.com/SeaSparrowOG/SKSE-Plugin-Template
-cd SKSE-Plugin-Template
+git clone https://github.com/SeaSparrowOG/Empyrean
+cd Empyrean
 git submodule update --init --recursive
 cmake --preset vs2022-windows-vcpkg-release
 cmake --build --preset Release

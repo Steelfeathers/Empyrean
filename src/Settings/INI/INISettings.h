@@ -46,9 +46,17 @@ namespace Settings
 			bool OverrideSettings();
 		};
 
-		inline static constexpr const std::uint8_t EXPECTED_COUNT = 0;
+		inline static constexpr const char* MARKSMAN_MULTISHOT_MAXPROJECTILES = "Marksman|iMaxMultishotProjectiles";
+		inline static constexpr const char* MARKSMAN_MULTISHOT_MINCONE = "Marksman|fMultishotMinSpreadAngle";
+		inline static constexpr const char* MARKSMAN_MULTISHOT_MAXCONE = "Marksman|fMultishotMaxSpreadAngle";
+		inline static constexpr const std::uint8_t EXPECTED_COUNT = 3;
 
 		inline static constexpr const std::array<const char*, EXPECTED_COUNT> EXPECTED_SETTINGS = {
+			MARKSMAN_MULTISHOT_MAXPROJECTILES, // Controls the maximum number of projectiles multishot can fire.
+
+			// Multishot only fires when the cone and count are greater than 0. The following two only clamp it if it fires.
+			MARKSMAN_MULTISHOT_MINCONE, // Controls the minimum spread angle for multishot projectiles.
+			MARKSMAN_MULTISHOT_MAXCONE  // Controls the maximum spread angle for multishot projectiles.
 		};
 
 		template <typename T>

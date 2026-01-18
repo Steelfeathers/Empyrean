@@ -21,6 +21,8 @@
 namespace logger = SKSE::log;
 
 using namespace std::literals;
+using namespace RE::literals;
+
 namespace util
 {
     [[nodiscard]] constexpr int ascii_tolower(int ch) noexcept

@@ -2,8 +2,8 @@
 
 namespace RE::Offset
 {
-	namespace Example
+	namespace TESObjectWEAP
 	{
-		constexpr auto FunctionName = REL::ID(55976);
+		constexpr auto Fire = REL::ID(18102); // +0xE60 -> CreateProjectile call, <ProjectileHandle* result, LaunchData& data>
 	}
 }
