@@ -8,7 +8,7 @@ option(COPY_PSC "Copies any script sources to the MO2 directory (if specified). 
 
 # -------- Project ----------
 project(
-	TemplateProject
+	Empyrean
 	VERSION 1.0.0
 	LANGUAGES CXX
 )
