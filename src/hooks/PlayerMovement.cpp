@@ -48,7 +48,7 @@ namespace Hooks
 	{
 		if (const auto perk = Data::ModObject<RE::BGSPerk>("PerkSprintReduceCost"sv);
 			perk && a_actor->HasPerk(perk)) {
-		float costMult = 0.1f;
+		float costMult = "SprintReduceCostMult"_gv.value_or(0.5f);
 		a_cost *= costMult;
 		}
 	}

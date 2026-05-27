@@ -7,6 +7,6 @@ namespace Papyrus {
 
 	using VM = RE::BSScript::Internal::VirtualMachine;
 	using StackID = RE::VMStackID;
-	inline auto script = "Empyrean_DLLFunctions"sv;
+	inline auto script = "PathsOfEmpyrean_DLLFunctions"sv;
 	bool RegisterFunctions(VM* a_vm);
 }

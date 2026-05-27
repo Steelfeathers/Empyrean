@@ -1,0 +1,3 @@
+Scriptname PathsOfEmpyrean_ModObjectsScript extends Quest
+
+Perk Property PerkSprintReduceCost Auto
