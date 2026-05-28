@@ -1,3 +1,10 @@
 Scriptname PathsOfEmpyrean_ModObjectsScript extends Quest
 
 Perk Property PerkSprintReduceCost Auto
+Perk Property PerkSubstituteHelmetLight Auto
+
+Keyword Property KeywordSubstituteHelmet auto
+Keyword Property KeywordArmorLightHelmet Auto
+Keyword Property KeywordArmorLightCuirass Auto
+Keyword Property KeywordArmorLightGauntlets Auto
+Keyword Property KeywordArmorLightBoots Auto

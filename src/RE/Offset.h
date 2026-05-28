@@ -18,4 +18,10 @@ namespace RE::Offset
 		constexpr auto UpdateCommandedActor = REL::ID(38799);
 		constexpr auto UpdateSprinting = REL::ID(38022);
 	}
+
+	namespace PlayerCharacter
+	{
+		inline constexpr REL::ID Vtbl(static_cast<std::uint64_t>(208040));
+	}
+
 }
