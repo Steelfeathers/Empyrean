@@ -1,5 +1,6 @@
 #include "Hooks/hooks.h"
 #include "PlayerMovement.h"
+#include "Unarmed.h"
 
 namespace Hooks {
 	bool Install() {
@@ -13,6 +14,7 @@ namespace Hooks {
 		bool result = true;
 
 		result &= PlayerMovement::InstallHooks();
+		result &= Unarmed::InstallHooks();
 
 		logger::info("Finished installing hooks."sv);
 		return result;
