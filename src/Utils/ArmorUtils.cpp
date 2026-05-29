@@ -1,10 +1,10 @@
-#include "PoEUtils.h"
+#include "ArmorUtils.h"
 #include "Data/Lookup.h"
 #include "Data/ModObjectManager.h"
 
-namespace Common
+namespace Utils
 {
-	std::vector<RE::TESObjectARMO*>* PoEUtils::GetEquippedArmor(const RE::Actor* a_actor)
+	std::vector<RE::TESObjectARMO*>* ArmorUtils::GetEquippedArmor(const RE::Actor* a_actor)
 	{
 		if (!a_actor) return {};
 
@@ -44,7 +44,7 @@ namespace Common
 		return armorList;
 	}
 
-	int PoEUtils::GetCountEquippedLightArmor(const RE::Actor* a_actor, bool allowSubstituteHelmet)
+	int ArmorUtils::GetCountEquippedLightArmor(const RE::Actor* a_actor, bool allowSubstituteHelmet)
 	{
 		if (!a_actor) return 0;
 
@@ -87,7 +87,7 @@ namespace Common
 		return count;
 	}
 
-	bool PoEUtils::HasEquppedLightArmorGauntlets(const RE::Actor* a_actor)
+	bool ArmorUtils::HasEquppedLightArmorGauntlets(const RE::Actor* a_actor)
 	{
 		if (!a_actor) return false;
 
@@ -99,6 +99,25 @@ namespace Common
 		for (const auto& armor : *armorList)
 		{
 			if (armor->IsLightArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorLightGauntlets)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool ArmorUtils::HasEquppedHeavyArmorGauntlets(const RE::Actor* a_actor)
+	{
+		if (!a_actor) return false;
+
+		const auto armorList = GetEquippedArmor(a_actor);
+		if (armorList->empty()) return false;
+
+		const auto kArmorHeavyGauntlets = Data::ModObject<RE::BGSKeyword>("KeywordArmorHeavyGauntlets"sv);
+
+		for (const auto& armor : *armorList)
+		{
+			if (armor->IsHeavyArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorHeavyGauntlets)))
 			{
 				return true;
 			}

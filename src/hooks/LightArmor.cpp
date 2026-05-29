@@ -1,5 +1,5 @@
 #include "LightArmor.h"
-#include "Common/PoEUtils.h"
+#include "Utils/ArmorUtils.h"
 #include "Data/Lookup.h"
 #include "Data/ModObjectManager.h"
 #include "RE/Offset.h"
@@ -14,11 +14,11 @@ namespace Hooks
 		return true;
 	}
 
-	void LightArmor::HandleUpdate(RE::PlayerCharacter* a_player, float a_delta)
+	void LightArmor::ProcessUpdate(RE::PlayerCharacter* a_player, float a_delta)
 	{
 		//Give player LightArmor XP if moving while wearing at least 2 pieces of light armor; more XP during combat
 		if (a_player->IsOnMount()) { return; }
-		int armorCount = Common::PoEUtils::GetCountEquippedLightArmor(a_player, false);
+		int armorCount = Utils::ArmorUtils::GetCountEquippedLightArmor(a_player, false);
 		if (armorCount < 2) { return; }
 
 		if (a_player->IsSprinting() || a_player->IsRunning()) {
@@ -55,20 +55,16 @@ namespace Hooks
 	float LightArmor::CalcSprintingStaminaMod(float a_cost, const RE::Actor* a_actor)
 	{
 		float cost = a_cost;
-		LightArmor::HandleSprintingCost(a_actor, cost);
+
+		if (const auto perk = Data::ModObject<RE::BGSPerk>("PerkSprintReduceCost"sv);
+			perk && a_actor->HasPerk(perk) && Utils::ArmorUtils::GetCountEquippedLightArmor(a_actor, true) >= 4) {
+			float costMult = "SprintReduceCostMult"_gv.value_or(0.5f);
+			cost *= costMult;
+		}
+
 		cost = (std::max)(cost, 0.0f);
 
 		// xorps xmm0, -1.0
 		return -cost;
 	}
-
-	void LightArmor::HandleSprintingCost(const RE::Actor* a_actor, float& a_cost)
-	{
-		if (const auto perk = Data::ModObject<RE::BGSPerk>("PerkSprintReduceCost"sv);
-			perk && a_actor->HasPerk(perk) && Common::PoEUtils::GetCountEquippedLightArmor(a_actor, true) >= 4) {
-			float costMult = "SprintReduceCostMult"_gv.value_or(0.5f);
-			a_cost *= costMult;
-		}
-	}
-
 }

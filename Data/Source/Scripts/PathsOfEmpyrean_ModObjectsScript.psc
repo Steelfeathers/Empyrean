@@ -8,3 +8,5 @@ Keyword Property KeywordArmorLightHelmet Auto
 Keyword Property KeywordArmorLightCuirass Auto
 Keyword Property KeywordArmorLightGauntlets Auto
 Keyword Property KeywordArmorLightBoots Auto
+
+Keyword Property KeywordArmorHeavyGauntlets Auto

@@ -47,11 +47,13 @@ namespace Settings
 		};
 
 		inline static constexpr const char* LIGHTARMOR_XP_FROM_UNARMED = "LightArmor|bGetXPFromUnarmedAttacks";
+		inline static constexpr const char* HEAVYARMOR_XP_FROM_UNARMED = "HeavyArmor|bGetXPFromUnarmedAttacks";
 
-		inline static constexpr const std::uint8_t EXPECTED_COUNT = 1;
+		inline static constexpr const std::uint8_t EXPECTED_COUNT = 2;
 
 		inline static constexpr const std::array<const char*, EXPECTED_COUNT> EXPECTED_SETTINGS = {
 			LIGHTARMOR_XP_FROM_UNARMED,
+			HEAVYARMOR_XP_FROM_UNARMED
 		};
 
 		template <typename T>
