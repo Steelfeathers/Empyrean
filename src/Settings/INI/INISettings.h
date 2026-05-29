@@ -46,14 +46,16 @@ namespace Settings
 			bool OverrideSettings();
 		};
 
-		inline static constexpr const char* LIGHTARMOR_XP_FROM_UNARMED = "LightArmor|bGetXPFromUnarmedAttacks";
-		inline static constexpr const char* HEAVYARMOR_XP_FROM_UNARMED = "HeavyArmor|bGetXPFromUnarmedAttacks";
+		inline static constexpr const char* LIGHTARMOR_XP_FROM_UNARMED = "Unarmed|bGetLightArmorXPFromUnarmedAttacks";
+		inline static constexpr const char* HEAVYARMOR_XP_FROM_UNARMED = "Unarmed|bGetHeavyArmorXPFromUnarmedAttacks";
+		inline static constexpr const char* ENABLE_UNARMED_SPEED_FIX = "Unarmed|bEnableUnarmedWeapSpeedMultFix";
 
-		inline static constexpr const std::uint8_t EXPECTED_COUNT = 2;
+		inline static constexpr const std::uint8_t EXPECTED_COUNT = 3;
 
 		inline static constexpr const std::array<const char*, EXPECTED_COUNT> EXPECTED_SETTINGS = {
 			LIGHTARMOR_XP_FROM_UNARMED,
-			HEAVYARMOR_XP_FROM_UNARMED
+			HEAVYARMOR_XP_FROM_UNARMED,
+			ENABLE_UNARMED_SPEED_FIX
 		};
 
 		template <typename T>

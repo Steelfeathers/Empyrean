@@ -78,6 +78,9 @@ namespace Hooks
 
 	void Unarmed::WeaponSpeedMultPatch()
 	{
+		if (!Settings::INI::GetSetting<bool>(Settings::INI::ENABLE_UNARMED_SPEED_FIX).value_or(true))
+			return;
+
 		// TRAMPOLINE: 28
 		util::CallHook<
 			struct WeaponSpeedTag,
