@@ -24,4 +24,6 @@ namespace RE::Offset
 		inline constexpr REL::ID Vtbl(static_cast<std::uint64_t>(208040));
 	}
 
+	constexpr auto HandleWeaponSpeedChannel = REL::ID(42779);
+	constexpr auto HandleLeftWeaponSpeedChannel = REL::ID(42780);
 }

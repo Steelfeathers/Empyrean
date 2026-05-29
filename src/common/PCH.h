@@ -10,6 +10,12 @@
 
 #include "Plugin.h"
 
+#ifdef NDEBUG
+#include <spdlog/sinks/basic_file_sink.h>
+#else
+#include <spdlog/sinks/msvc_sink.h>
+#endif
+
 #define DLLEXPORT __declspec(dllexport)
 
 #ifndef NDEBUG
@@ -21,6 +27,17 @@
 namespace logger = SKSE::log;
 
 using namespace std::literals;
+using namespace RE::literals;
+
+template <typename Tag, typename, std::uint64_t ID, std::ptrdiff_t Off>
+struct CallHookImpl;
+
+template <typename Tag, typename R, typename... Args, std::uint64_t ID, std::ptrdiff_t Off>
+struct CallHookImpl<Tag, R(Args...), ID, Off>
+{
+    static R func(Args...);
+};
+
 namespace util
 {
     [[nodiscard]] constexpr int ascii_tolower(int ch) noexcept
@@ -29,6 +46,61 @@ namespace util
             ch += 'a' - 'A';
         return ch;
     }
+
+    template <auto F>
+    struct original_func
+    {
+        inline static REL::Relocation<decltype(F)> value;
+    };
+
+    template <auto F>
+    inline static const auto& call_original = original_func<F>::value;
+
+    template <typename Tag, typename F, std::uint64_t ID, std::ptrdiff_t Off>
+    struct CallHook
+    {
+        template <std::size_t N, bool TAIL = false>
+        static bool write()
+        {
+            auto hook = REL::Relocation<std::uintptr_t>(REL::ID(ID), Off);
+            []()
+                {
+                    if constexpr (N == 5)
+                        if constexpr (!TAIL)
+                            return REL::make_pattern<"E8">();
+                        else
+                            return REL::make_pattern<"E9">();
+                    else if constexpr (N == 6)
+                        if constexpr (!TAIL)
+                            return REL::make_pattern<"FF 15">();
+                        else
+                            return REL::make_pattern<"FF 25">();
+                }()
+                    .match_or_fail(hook.address());
+
+                std::uintptr_t addr =
+                    (SKSE::GetTrampoline().*
+                        []()
+                        {
+                            if constexpr (!TAIL)
+                                return &SKSE::Trampoline::write_call<N, F>;
+                            else
+                                return &SKSE::Trampoline::write_branch<N, F>;
+                        }())(hook.address(), &CallHookImpl<Tag, F, ID, Off>::func);
+
+                if constexpr (N == 6)
+                    addr = *reinterpret_cast<std::uintptr_t*>(addr);
+
+                original_func<&CallHookImpl<Tag, F, ID, Off>::func>::value = addr;
+
+                return true;
+        }
+
+        static bool write5() { return write<5, false>(); }
+        static bool write5_tail() { return write<5, true>(); }
+        static bool write6() { return write<6, false>(); }
+        static bool write6_tail() { return write<6, true>(); }
+    };
 
     struct iless
     {
