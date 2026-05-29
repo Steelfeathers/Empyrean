@@ -49,6 +49,7 @@ namespace Common
 		if (!a_actor) return 0;
 
 		const auto armorList = GetEquippedArmor(a_actor);
+		if (armorList->empty()) return 0;
 
 		int count = 0;
 		const auto perkSubstituteHelmet = Data::ModObject<RE::BGSPerk>("PerkSubstituteHelmetLight"sv);
@@ -84,5 +85,24 @@ namespace Common
 		}
 
 		return count;
+	}
+
+	bool PoEUtils::HasEquppedLightArmorGauntlets(const RE::Actor* a_actor)
+	{
+		if (!a_actor) return false;
+
+		const auto armorList = GetEquippedArmor(a_actor);
+		if (armorList->empty()) return false;
+
+		const auto kArmorLightGauntlets = Data::ModObject<RE::BGSKeyword>("KeywordArmorLightGauntlets"sv);
+
+		for (const auto& armor : *armorList)
+		{
+			if (armor->IsLightArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorLightGauntlets)))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

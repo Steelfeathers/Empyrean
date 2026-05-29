@@ -2,13 +2,11 @@
 
 namespace Hooks
 {
-	struct PlayerMovement
+	struct LightArmor
 	{
 		static bool InstallHooks();
 
-		static void InstallUpdateHook();
-		static void Update(RE::PlayerCharacter* a_player, float a_delta);
-		inline static REL::Relocation<decltype(&Update)> _Update;
+		static void HandleUpdate(RE::PlayerCharacter* a_player, float a_delta);
 
 		static void HandleSprintingCost(const RE::Actor* a_actor, float& a_cost);
 		static void InstallSprintingCostHook();

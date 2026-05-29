@@ -1,6 +1,9 @@
 #include "Hooks/hooks.h"
-#include "PlayerMovement.h"
+#include "LightArmor.h"
 #include "Unarmed.h"
+#include "RE/Offset.h"
+#include <xbyak/xbyak.h>
+#include <Windows.h>
 
 namespace Hooks {
 	bool Install() {
@@ -13,10 +16,24 @@ namespace Hooks {
 
 		bool result = true;
 
-		result &= PlayerMovement::InstallHooks();
+		InstallUpdateHook();
+		result &= LightArmor::InstallHooks();
 		result &= Unarmed::InstallHooks();
 
 		logger::info("Finished installing hooks."sv);
 		return result;
+	}
+
+	void InstallUpdateHook()
+	{
+		auto vtbl = REL::Relocation<std::uintptr_t>(RE::Offset::PlayerCharacter::Vtbl);
+		_Update = vtbl.write_vfunc(173, &Update);
+	}
+
+	void Update(RE::PlayerCharacter* a_player, float a_delta)
+	{
+		_Update(a_player, a_delta);
+
+		LightArmor::HandleUpdate(a_player, a_delta);
 	}
 }

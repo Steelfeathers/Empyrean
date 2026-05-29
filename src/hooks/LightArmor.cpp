@@ -1,4 +1,4 @@
-#include "PlayerMovement.h"
+#include "LightArmor.h"
 #include "Common/PoEUtils.h"
 #include "Data/Lookup.h"
 #include "Data/ModObjectManager.h"
@@ -8,30 +8,21 @@
 
 namespace Hooks
 {
-	bool PlayerMovement::InstallHooks() {
-		logger::info("  Installing PlayerMovement Hooks..."sv);
-		InstallUpdateHook();
+	bool LightArmor::InstallHooks() {
+		logger::info("  Installing LightArmor Hooks..."sv);
 		InstallSprintingCostHook();
 		return true;
 	}
 
-	void PlayerMovement::InstallUpdateHook()
+	void LightArmor::HandleUpdate(RE::PlayerCharacter* a_player, float a_delta)
 	{
-		auto vtbl = REL::Relocation<std::uintptr_t>(RE::Offset::PlayerCharacter::Vtbl);
-		_Update = vtbl.write_vfunc(173, &PlayerMovement::Update);
-	}
-
-	void PlayerMovement::Update(RE::PlayerCharacter* a_player, float a_delta)
-	{
-		_Update(a_player, a_delta);
-
 		//Give player LightArmor XP if moving while wearing at least 2 pieces of light armor; more XP during combat
 		if (a_player->IsOnMount()) { return; }
 		int armorCount = Common::PoEUtils::GetCountEquippedLightArmor(a_player, false);
 		if (armorCount < 2) { return; }
 
 		if (a_player->IsSprinting() || a_player->IsRunning()) {
-			float baseRate = "SkillXPLightAmorBaseRate"_gv.value_or(0.5f);
+			float baseRate = "SkillXPLightAmorBaseRate"_gv.value_or(0.75f);
 			float armorCountAdd = "SkillXPLightAmorGearCountAdd"_gv.value_or(0.25f) * (armorCount - 2);
 			float combatMult = a_player->IsInCombat() ? "SkillXPLightAmorCombatMult"_gv.value_or(2.0f) : 1.0f;
 			float sprintMult = a_player->IsSprinting() ? "SkillXPLightAmorSprintMult"_gv.value_or(1.5f) : 1.0f;
@@ -40,7 +31,7 @@ namespace Hooks
 		}
 	}
 
-	void PlayerMovement::InstallSprintingCostHook()
+	void LightArmor::InstallSprintingCostHook()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::Actor::UpdateSprinting, 0xCE);
 		REL::make_pattern<"0F 57 05">().match_or_fail(hook.address());
@@ -52,7 +43,7 @@ namespace Hooks
 			{
 				mov(rdx, rdi);
 				jmp(ptr[rip]);
-				dq(std::bit_cast<std::uintptr_t>(&PlayerMovement::CalcSprintingStaminaMod));
+				dq(std::bit_cast<std::uintptr_t>(&LightArmor::CalcSprintingStaminaMod));
 			}
 		};
 
@@ -61,17 +52,17 @@ namespace Hooks
 		trampoline.write_call<5>(hook.address(), Patch().getCode());
 	}
 
-	float PlayerMovement::CalcSprintingStaminaMod(float a_cost, const RE::Actor* a_actor)
+	float LightArmor::CalcSprintingStaminaMod(float a_cost, const RE::Actor* a_actor)
 	{
 		float cost = a_cost;
-		PlayerMovement::HandleSprintingCost(a_actor, cost);
+		LightArmor::HandleSprintingCost(a_actor, cost);
 		cost = (std::max)(cost, 0.0f);
 
 		// xorps xmm0, -1.0
 		return -cost;
 	}
 
-	void PlayerMovement::HandleSprintingCost(const RE::Actor* a_actor, float& a_cost)
+	void LightArmor::HandleSprintingCost(const RE::Actor* a_actor, float& a_cost)
 	{
 		if (const auto perk = Data::ModObject<RE::BGSPerk>("PerkSprintReduceCost"sv);
 			perk && a_actor->HasPerk(perk) && Common::PoEUtils::GetCountEquippedLightArmor(a_actor, true) >= 4) {

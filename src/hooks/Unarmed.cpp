@@ -1,4 +1,7 @@
 #include "Unarmed.h"
+#include "Common/PoEUtils.h"
+#include "Settings/INI/INISettings.h"
+#include "Data/Lookup.h"
 #include "RE/Offset.h"
 #include <xbyak/xbyak.h>
 
@@ -51,9 +54,15 @@ namespace Hooks
 		if (!a_hitData.weapon || !a_hitData.weapon->IsHandToHandMelee())
 			return;
 
-		//const auto playerChar = aggressor->As<RE::PlayerCharacter>();
-		//if (!playerChar) { return; }
-		//playerChar->AddSkillExperience(RE::ActorValue::kLightArmor, skillUse);
-		RE::PlayerCharacter::GetSingleton()->AddSkillExperience(RE::ActorValue::kLightArmor, 10.0f);
+		auto giveLightXP = Settings::INI::GetSetting<bool>(Settings::INI::LIGHTARMOR_XP_FROM_UNARMED).value_or(false);
+
+		if (giveLightXP && Common::PoEUtils::HasEquppedLightArmorGauntlets(aggressor->As<RE::Actor>()))
+		{
+			//logger::info(FMT_STRING("  *Unarmed hit! TotalDamage = {}"), a_hitData.totalDamage);
+			float xp = a_hitData.totalDamage * "SkillXPFromUnarmedMult"_gv.value_or(0.5f);
+			RE::PlayerCharacter::GetSingleton()->AddSkillExperience(RE::ActorValue::kLightArmor, xp);
+		}
+		
+		
 	}
 }
