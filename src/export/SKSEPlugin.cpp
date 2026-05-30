@@ -16,7 +16,6 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 		}
 
 		SECTION_SEPARATOR;
-		Hooks::Pickpocket::SetRacesAllowPickpocket();
 		Hooks::Pickpocket::InstallActivateHook();
 
 		SECTION_SEPARATOR;

@@ -36,10 +36,24 @@ namespace Hooks {
 	void Update(RE::PlayerCharacter* a_player, float a_delta)
 	{
 		_Update(a_player, a_delta);
-
 		LightArmor::ProcessUpdate(a_player, a_delta);
 	}
 
+	void InstallCombatHitHook()
+	{
+		auto& trampoline = SKSE::GetTrampoline();
+		//REL::ID(38627)
+		REL::Relocation<std::uintptr_t> target{ RE::Offset::Actor::CombatHit, 0x4A8 };
+		_originalCall = trampoline.write_call<5>(target.address(), &ProcessCombatHit);
+	}
+
+	void ProcessCombatHit(RE::Actor* a_this, RE::HitData* a_hitData)
+	{
+		_originalCall(a_this, a_hitData);
+		Unarmed::ProcessCombatHit(a_this, a_hitData);
+	}
+
+	/*
 	void InstallCombatHitHook()
 	{
 		auto hook = REL::Relocation<std::uintptr_t>(RE::Offset::Actor::CombatHit, 0x292);
@@ -76,4 +90,5 @@ namespace Hooks {
 	{
 		Unarmed::ProcessCombatHit(a_hitData);
 	}
+	*/
 }
