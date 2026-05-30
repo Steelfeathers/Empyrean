@@ -10,3 +10,8 @@ Keyword Property KeywordArmorLightGauntlets Auto
 Keyword Property KeywordArmorLightBoots Auto
 
 Keyword Property KeywordArmorHeavyGauntlets Auto
+
+Perk Property PerkDaringFingersmith1 Auto
+Perk Property PerkDaringFingersmith2 Auto
+Formlist Property ListRacesAllowPickpocketRank1 Auto
+Keyword Property KeywordRaceAllowPickpocketRank1 Auto

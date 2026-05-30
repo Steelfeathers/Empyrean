@@ -1,6 +1,7 @@
 #include "Hooks/hooks.h"
 #include "LightArmor.h"
 #include "Unarmed.h"
+#include "Pickpocket.h"
 #include "RE/Offset.h"
 #include <xbyak/xbyak.h>
 #include <Windows.h>
@@ -20,6 +21,7 @@ namespace Hooks {
 		InstallCombatHitHook();
 		result &= LightArmor::InstallHooks();
 		result &= Unarmed::InstallHooks();
+		result &= Pickpocket::InstallHooks();
 
 		logger::info("Finished installing hooks."sv);
 		return result;

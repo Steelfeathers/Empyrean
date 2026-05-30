@@ -1,4 +1,5 @@
 #include "papyrus.h"
+#include "Hooks/Pickpocket.h"
 
 namespace Papyrus
 {
@@ -6,9 +7,16 @@ namespace Papyrus
 		return { Plugin::VERSION[0], Plugin::VERSION[1], Plugin::VERSION[2] };
 	}
 
+	static void UpdateRacesAllowPickpocket(STATIC_ARGS)
+	{
+		Hooks::Pickpocket::SetRacesAllowPickpocket();
+	}
+
 	void Bind(VM& a_vm) {
 		logger::info("  >Binding GetVersion..."sv);
 		BIND(GetVersion);
+		logger::info("  >UpdateRacesAllowPickpocket..."sv);
+		BIND(UpdateRacesAllowPickpocket);
 	}
 
 	bool RegisterFunctions(VM* a_vm) {

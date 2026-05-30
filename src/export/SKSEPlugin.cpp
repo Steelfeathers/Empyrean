@@ -1,3 +1,4 @@
+#include "Hooks/Pickpocket.h"
 #include "Data/ModObjectManager.h"
 #include "Hooks/Hooks.h"
 #include "Papyrus/Papyrus.h"
@@ -13,6 +14,11 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 		if (!Data::PreloadModObjects()) {
 			SKSE::stl::report_and_fail("Failed to preload mod objects. Check the log for more information."sv);
 		}
+
+		SECTION_SEPARATOR;
+		Hooks::Pickpocket::SetRacesAllowPickpocket();
+		Hooks::Pickpocket::InstallActivateHook();
+
 		SECTION_SEPARATOR;
 		logger::info("Finished startup tasks, enjoy your game!"sv);
 		break;
