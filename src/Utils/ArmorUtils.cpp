@@ -4,7 +4,7 @@
 
 namespace Utils
 {
-	std::vector<RE::TESObjectARMO*>* ArmorUtils::GetEquippedArmor(const RE::Actor* a_actor)
+	std::vector<RE::TESObjectARMO*> ArmorUtils::GetEquippedArmor(const RE::Actor* a_actor)
 	{
 		if (!a_actor) return {};
 
@@ -13,7 +13,7 @@ namespace Utils
 			return {};
 		}
 
-		const auto armorList = new std::vector<RE::TESObjectARMO*>{};
+		auto armorList = std::vector<RE::TESObjectARMO*>{};
 
 		const auto invLists = invChanges->entryList;
 		if (!invLists || invLists->empty()) {
@@ -38,7 +38,7 @@ namespace Utils
 			}
 			if (!worn) { continue; }
 			//if (armor->bipedModelData.armorType == RE::BIPED_MODEL::ArmorType::kClothing) { continue; }
-			armorList->push_back(armor);
+			armorList.push_back(armor);
 		}
 
 		return armorList;
@@ -49,7 +49,7 @@ namespace Utils
 		if (!a_actor) return 0;
 
 		const auto armorList = GetEquippedArmor(a_actor);
-		if (armorList->empty()) return 0;
+		if (armorList.empty()) return 0;
 
 		int count = 0;
 		const auto perkSubstituteHelmet = Data::ModObject<RE::BGSPerk>("PerkSubstituteHelmetLight"sv);
@@ -59,7 +59,7 @@ namespace Utils
 		const auto kArmorLightGauntlets = Data::ModObject<RE::BGSKeyword>("KeywordArmorLightGauntlets"sv);
 		const auto kArmorLightBoots = Data::ModObject<RE::BGSKeyword>("KeywordArmorLightBoots"sv);
 
-		for (const auto& armor : *armorList) 
+		for (const auto& armor : armorList) 
 		{	
 			if (armor->IsLightArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorLightGauntlets)))
 			{
@@ -92,11 +92,11 @@ namespace Utils
 		if (!a_actor) return false;
 
 		const auto armorList = GetEquippedArmor(a_actor);
-		if (armorList->empty()) return false;
+		if (armorList.empty()) return false;
 
 		const auto kArmorLightGauntlets = Data::ModObject<RE::BGSKeyword>("KeywordArmorLightGauntlets"sv);
 
-		for (const auto& armor : *armorList)
+		for (const auto& armor : armorList)
 		{
 			if (armor->IsLightArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorLightGauntlets)))
 			{
@@ -111,11 +111,11 @@ namespace Utils
 		if (!a_actor) return false;
 
 		const auto armorList = GetEquippedArmor(a_actor);
-		if (armorList->empty()) return false;
+		if (armorList.empty()) return false;
 
 		const auto kArmorHeavyGauntlets = Data::ModObject<RE::BGSKeyword>("KeywordArmorHeavyGauntlets"sv);
 
-		for (const auto& armor : *armorList)
+		for (const auto& armor : armorList)
 		{
 			if (armor->IsHeavyArmor() && (armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kHands) || armor->HasPartOf(RE::BGSBipedObjectForm::BipedObjectSlot::kForearms) || armor->HasKeyword(kArmorHeavyGauntlets)))
 			{

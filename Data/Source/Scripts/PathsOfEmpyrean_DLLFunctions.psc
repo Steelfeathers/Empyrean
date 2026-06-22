@@ -7,3 +7,6 @@ int[] function GetVersion() global native
 
 ;-----------------------------------------------------------------------
 function UpdateRacesAllowPickpocket() global native
+
+;-----------------------------------------------------------------------
+armor[] function GetAllEquippedArmor(Actor a_actor) global native

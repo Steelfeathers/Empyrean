@@ -12,6 +12,7 @@ namespace Hooks
 
 	void Alteration::ProcessUpdate(RE::PlayerCharacter* a_player, float a_delta)
 	{
+		//============== BLOOD MAGE ==============
 		const auto perkBloodMage1 = Data::ModObject<RE::BGSPerk>("PerkBloodMage1"sv);
 		const auto perkBloodMage2 = Data::ModObject<RE::BGSPerk>("PerkBloodMage2"sv);
 		const auto gloPrevHPModAmt = Data::ModObject<RE::TESGlobal>("GlobalBloodMagePrevHPAmt"sv);

@@ -1,5 +1,6 @@
 #include "papyrus.h"
 #include "Hooks/Pickpocket.h"
+#include "Utils/ArmorUtils.h"
 
 namespace Papyrus
 {
@@ -12,11 +13,18 @@ namespace Papyrus
 		Hooks::Pickpocket::SetRacesAllowPickpocket();
 	}
 
+	std::vector< RE::TESObjectARMO*> GetAllEquippedArmor(STATIC_ARGS, RE::Actor* a_actor)
+	{
+		return Utils::ArmorUtils::GetEquippedArmor(a_actor);
+	}
+
 	void Bind(VM& a_vm) {
 		logger::info("  >Binding GetVersion..."sv);
 		BIND(GetVersion);
-		logger::info("  >UpdateRacesAllowPickpocket..."sv);
+		logger::info("  >Binding UpdateRacesAllowPickpocket..."sv);
 		BIND(UpdateRacesAllowPickpocket);
+		logger::info("  >Binding GetAllEquippedArmor..."sv);
+		BIND(GetAllEquippedArmor);
 	}
 
 	bool RegisterFunctions(VM* a_vm) {
