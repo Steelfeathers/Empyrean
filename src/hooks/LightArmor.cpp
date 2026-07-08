@@ -5,6 +5,7 @@
 #include "RE/Offset.h"
 #include <xbyak/xbyak.h>
 #include <Windows.h>
+#include "Settings/INI/INISettings.h"
 
 namespace Hooks
 {
@@ -16,16 +17,26 @@ namespace Hooks
 
 	void LightArmor::ProcessUpdate(RE::PlayerCharacter* a_player, float a_delta)
 	{
+		auto givePassiveXP = Settings::INI::GetSetting<bool>(Settings::INI::ENABLE_LIGHTARMOR_PASSIVE_XP).value_or(false);
+		if (!givePassiveXP)
+			return;
+
 		//Give player LightArmor XP if moving while wearing at least 2 pieces of light armor; more XP during combat
 		if (a_player->IsOnMount()) { return; }
 		int armorCount = Utils::ArmorUtils::GetCountEquippedLightArmor(a_player, false);
 		if (armorCount < 2) { return; }
 
+		auto SkillXPLightAmorBaseRate = Settings::INI::GetSetting<float>(Settings::INI::SKILL_XP_LIGHTARMOR_BASE_RATE).value_or(0.0);
+		auto SkillXPLightAmorGearCountAdd = Settings::INI::GetSetting<float>(Settings::INI::SKILL_XP_LIGHTARMOR_GEAR_COUNT_ADD).value_or(0.0);
+		auto SkillXPLightAmorCombatMult = Settings::INI::GetSetting<float>(Settings::INI::SKILL_XP_LIGHTARMOR_COMBAT_MULT).value_or(0.0);
+		auto SkillXPLightAmorSprintMult = Settings::INI::GetSetting<float>(Settings::INI::SKILL_XP_LIGHTARMOR_SPRINT_MULT).value_or(0.0);
+		//logger::info("  {}, {}, {}, {}"sv, SkillXPLightAmorBaseRate, SkillXPLightAmorGearCountAdd, SkillXPLightAmorCombatMult, SkillXPLightAmorSprintMult);
+
 		if (a_player->IsSprinting() || a_player->IsRunning()) {
-			float baseRate = "SkillXPLightAmorBaseRate"_gv.value_or(0.75f);
-			float armorCountAdd = "SkillXPLightAmorGearCountAdd"_gv.value_or(0.25f) * (armorCount - 2);
-			float combatMult = a_player->IsInCombat() ? "SkillXPLightAmorCombatMult"_gv.value_or(2.0f) : 1.0f;
-			float sprintMult = a_player->IsSprinting() ? "SkillXPLightAmorSprintMult"_gv.value_or(1.5f) : 1.0f;
+			float baseRate = SkillXPLightAmorBaseRate;
+			float armorCountAdd = SkillXPLightAmorGearCountAdd * (armorCount - 2);
+			float combatMult = a_player->IsInCombat() ? SkillXPLightAmorCombatMult : 1.0f;
+			float sprintMult = a_player->IsSprinting() ? SkillXPLightAmorSprintMult : 1.0f;
 			float skillUse = a_delta * (baseRate + armorCountAdd) * combatMult * sprintMult;
 			a_player->AddSkillExperience(RE::ActorValue::kLightArmor, skillUse);
 		}

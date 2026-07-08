@@ -46,15 +46,27 @@ namespace Settings
 			bool OverrideSettings();
 		};
 
-		inline static constexpr const char* LIGHTARMOR_XP_FROM_UNARMED = "Unarmed|bGetLightArmorXPFromUnarmedAttacks";
-		inline static constexpr const char* HEAVYARMOR_XP_FROM_UNARMED = "Unarmed|bGetHeavyArmorXPFromUnarmedAttacks";
+		inline static constexpr const char* ENABLE_LIGHTARMOR_PASSIVE_XP = "LightArmor|bGainPassiveLightArmorXP";
+		inline static constexpr const char* SKILL_XP_LIGHTARMOR_BASE_RATE = "LightArmor|fSkillXPLightAmorBaseRate";
+		inline static constexpr const char* SKILL_XP_LIGHTARMOR_GEAR_COUNT_ADD = "LightArmor|fSkillXPLightAmorGearCountAdd";
+		inline static constexpr const char* SKILL_XP_LIGHTARMOR_SPRINT_MULT = "LightArmor|fSkillXPLightAmorSprintMult";
+		inline static constexpr const char* SKILL_XP_LIGHTARMOR_COMBAT_MULT = "LightArmor|fSkillXPLightAmorCombatMult";
+		inline static constexpr const char* ENABLE_LIGHTARMOR_XP_FROM_UNARMED = "Unarmed|bGetLightArmorXPFromUnarmedAttacks";
+		inline static constexpr const char* ENABLE_HEAVYARMOR_XP_FROM_UNARMED = "Unarmed|bGetHeavyArmorXPFromUnarmedAttacks";
+		inline static constexpr const char* SKILL_XP_FROM_UNARMED_MULT = "Unarmed|fSkillXPFromUnarmedMult";
 		inline static constexpr const char* ENABLE_UNARMED_SPEED_FIX = "Unarmed|bEnableUnarmedWeapSpeedMultFix";
 
-		inline static constexpr const std::uint8_t EXPECTED_COUNT = 3;
+		inline static constexpr const std::uint8_t EXPECTED_COUNT = 9;
 
 		inline static constexpr const std::array<const char*, EXPECTED_COUNT> EXPECTED_SETTINGS = {
-			LIGHTARMOR_XP_FROM_UNARMED,
-			HEAVYARMOR_XP_FROM_UNARMED,
+			ENABLE_LIGHTARMOR_PASSIVE_XP,
+			SKILL_XP_LIGHTARMOR_BASE_RATE,
+			SKILL_XP_LIGHTARMOR_GEAR_COUNT_ADD,
+			SKILL_XP_LIGHTARMOR_SPRINT_MULT,
+			SKILL_XP_LIGHTARMOR_COMBAT_MULT,
+			ENABLE_LIGHTARMOR_XP_FROM_UNARMED,
+			ENABLE_HEAVYARMOR_XP_FROM_UNARMED,
+			SKILL_XP_FROM_UNARMED_MULT,
 			ENABLE_UNARMED_SPEED_FIX
 		};
 

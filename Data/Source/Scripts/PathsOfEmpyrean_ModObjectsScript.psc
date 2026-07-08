@@ -19,3 +19,10 @@ Keyword Property KeywordRaceAllowPickpocketRank1 Auto
 Perk Property PerkBloodMage1 Auto
 Perk Property PerkBloodMage2 Auto
 GlobalVariable Property GlobalBloodMagePrevHPAmt Auto
+
+Perk Property PerkAThousandCuts Auto
+Perk Property PerkBleedOut auto
+Keyword Property KeywordWeapBleed Auto
+Keyword Property KeywordWeapBladed1H auto
+Keyword Property KeywordWeapBladed2H auto
+Spell Property SpellBleedOut auto
