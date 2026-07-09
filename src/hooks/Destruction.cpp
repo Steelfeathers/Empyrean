@@ -3,17 +3,209 @@
 #include "Data/ModObjectManager.h"
 #include "RE/Offset.h"
 #include "Settings/INI/INISettings.h"
+#include "Utils/MagicUtils.h"
 using namespace RE;
 
 namespace Hooks
 {
-	inline std::unordered_set<RE::EffectSetting*> mainMagEffs_frost;
+	inline RE::BGSKeyword* KeywordMagicEffectMainFire;
+	inline RE::BGSKeyword* KeywordImmolate;
+	inline RE::BGSPerk* PerkCatchFire;
+	inline RE::BGSPerk* PerkImmolate;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_ConcAimed;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_ConcTarget;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFAimed;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFContact;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFTarget;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFTargetLoc;
 
-	bool IsMainMagEffFrost(EffectSetting* magEff) {
-		return magEff && mainMagEffs_frost.contains(magEff);
+	inline RE::BGSKeyword* KeywordMagicEffectMainFrost;
+	inline RE::BGSKeyword* KeywordPiercingCold;
+	inline RE::BGSKeyword* KeywordFrostborn;
+	inline RE::BGSPerk* PerkFrostborn;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_ConcAimed;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_ConcTarget;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFAimed;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFContact;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFTarget;
+	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFTargetLoc;
+	
+	inline RE::BGSKeyword* MagicDamageFire;
+	inline RE::BGSKeyword* MagicDamageFrost;
+	inline RE::BGSKeyword* MagicDamageShock;
+	
+	//------------------------------------------------------------------------
+	//------------------------------------------------------------------------
+	void Destruction::LoadData()
+	{
+		//auto keywordMagicDamageFrost = RE::TESForm::LookupByEditorID("MagicDamageFrost")->As<RE::BGSKeyword>();
+
+		//Fire keywords and reference secondary effects
+		KeywordMagicEffectMainFire = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFire"sv);
+		PerkCatchFire = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_CatchFire"sv);
+		KeywordImmolate = Data::ModObject<RE::BGSKeyword>("PoE_K_Immolate"sv);
+		PerkImmolate = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Immolate"sv);
+
+		const auto refSpellFire_ConcAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFire_ConcAimed"sv);
+		for (auto* refEff : refSpellFire_ConcAimed->effects)
+		{
+			secondaryMagEffsFire_ConcAimed.insert(refEff);
+		}
+		const auto refSpellFire_FFAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFire_FFAimed"sv);
+		for (auto* refEff : refSpellFire_FFAimed->effects)
+		{
+			secondaryMagEffsFire_FFAimed.insert(refEff);
+		}
+
+		//Frost keywords and reference secondary effects
+		KeywordMagicEffectMainFrost = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFrost"sv);
+		KeywordPiercingCold = Data::ModObject<RE::BGSKeyword>("PoE_K_PiercingCold"sv);
+		KeywordFrostborn = Data::ModObject<RE::BGSKeyword>("PoE_K_Frostborn"sv);
+		PerkFrostborn = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Frostborn"sv);
+		
+		const auto refSpellFrost_ConcAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_ConcAimed"sv);
+		for (auto* refEff : refSpellFrost_ConcAimed->effects)
+		{
+			secondaryMagEffsFrost_ConcAimed.insert(refEff);
+		}
+		const auto refSpellFrost_ConcTarget = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_ConcTarget"sv);
+		for (auto* refEff : refSpellFrost_ConcTarget->effects)
+		{
+			secondaryMagEffsFrost_ConcTarget.insert(refEff);
+		}
+		const auto refSpellFrost_FFAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_FFAimed"sv);
+		for (auto* refEff : refSpellFrost_FFAimed->effects)
+		{
+			secondaryMagEffsFrost_FFAimed.insert(refEff);
+		}
+		const auto refSpellFrost_FFContact = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_FFContact"sv);
+		for (auto* refEff : refSpellFrost_FFContact->effects)
+		{
+			secondaryMagEffsFrost_FFContact.insert(refEff);
+		}
+		const auto refSpellFrost_FFTarget = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_FFTarget"sv);
+		for (auto* refEff : refSpellFrost_FFTarget->effects)
+		{
+			secondaryMagEffsFrost_FFTarget.insert(refEff);
+		}
+		const auto refSpellFrost_FFTargetLoc = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_FFTargetLoc"sv);
+		for (auto* refEff : refSpellFrost_FFTargetLoc->effects)
+		{
+			secondaryMagEffsFrost_FFTargetLoc.insert(refEff);
+		}
 	}
 
-	bool AddMagicEffect(RE::MagicItem* a_spell, RE::EffectSetting* a_effSetting, float a_mag, RE::Effect* a_refEff)
+	void Destruction::PatchSpell(RE::SpellItem* spell, RE::Effect* eff, RE::EffectSetting* magEff)
+	{
+		if (magEff->HasKeyword(KeywordMagicEffectMainFire))
+		{
+			PatchFireSpell(spell, eff, magEff);
+		}
+		else if (magEff->HasKeyword(KeywordMagicEffectMainFrost))
+		{
+			PatchFrostSpell(spell, eff, magEff);
+		}
+	}
+
+	void Destruction::PatchFireSpell(RE::SpellItem* spell, RE::Effect* eff, RE::EffectSetting* magEff)
+	{
+		auto secondaryRefEffs = std::unordered_set<RE::Effect*>{};
+
+		auto castingType = magEff->data.castingType;
+		auto deliveryType = magEff->data.delivery;
+
+		bool validType = false;
+		if (castingType == RE::MagicSystem::CastingType::kConcentration && deliveryType == RE::MagicSystem::Delivery::kAimed)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_ConcAimed;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kConcentration && deliveryType == RE::MagicSystem::Delivery::kTargetActor)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_ConcTarget;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kAimed)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_FFAimed;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTargetActor)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_FFTarget;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTouch)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_FFContact;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTargetLocation)
+		{
+			secondaryRefEffs = secondaryMagEffsFire_FFTargetLoc;
+			validType = true;
+		}
+
+		if (!validType) return;
+
+		for (auto* refEff : secondaryRefEffs)
+		{
+			float mag = refEff->effectItem.magnitude;
+			AddMagicEffect(spell, refEff->baseEffect, mag, eff);
+		}
+		logger::info("Patched fire spell {}"sv, spell->GetName());
+	}
+
+	void Destruction::PatchFrostSpell(RE::SpellItem* spell, RE::Effect* eff, RE::EffectSetting* magEff)
+	{
+		auto secondaryRefEffs = std::unordered_set<RE::Effect*>{};
+
+		auto castingType = magEff->data.castingType;
+		auto deliveryType = magEff->data.delivery;
+
+		bool validType = false;
+		if (castingType == RE::MagicSystem::CastingType::kConcentration && deliveryType == RE::MagicSystem::Delivery::kAimed)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_ConcAimed;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kConcentration && deliveryType == RE::MagicSystem::Delivery::kTargetActor)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_ConcTarget;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kAimed)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_FFAimed;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTargetActor)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_FFTarget;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTouch)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_FFContact;
+			validType = true;
+		}
+		else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kTargetLocation)
+		{
+			secondaryRefEffs = secondaryMagEffsFrost_FFTargetLoc;
+			validType = true;
+		}
+
+		if (!validType) return;
+
+		for (auto* refEff : secondaryRefEffs)
+		{
+			float mag = refEff->baseEffect->HasKeyword(KeywordPiercingCold) ? eff->effectItem.magnitude * 0.25 : refEff->effectItem.magnitude;
+			AddMagicEffect(spell, refEff->baseEffect, mag, eff);
+		}
+		logger::info("Patched frost spell {}"sv, spell->GetName());
+	}
+
+	bool Destruction::AddMagicEffect(RE::MagicItem* a_spell, RE::EffectSetting* a_effSetting, float a_mag, RE::Effect* a_refEff)
 	{
 		if (auto effect = new RE::Effect()) {
 			effect->effectItem.magnitude = a_mag;
@@ -27,107 +219,41 @@ namespace Hooks
 		return false;
 	}
 
-	void Destruction::PatchFrostSpells()
+	/*
+	bool Destruction::SplitMagicEffect(RE::EffectSetting* origEffect)
 	{
-		TESDataHandler* dataHandler = TESDataHandler::GetSingleton();
-		if (!dataHandler) return;
+		auto baseEff = new RE::EffectSetting();
+		baseEff->Copy(origEffect);
+		
+	}
+	*/
 
-		const auto KeywordMagicEffectMainFrost = Data::ModObject<RE::BGSKeyword>("KeywordMagicEffectMainFrost"sv);
-		const auto MagEffChilledToTheBone_concAimed = Data::ModObject<RE::EffectSetting>("MagEffChilledToTheBone_concAimed"sv);
-		const auto MagEffChilledToTheBone_FFAimed = Data::ModObject<RE::EffectSetting>("MagEffChilledToTheBone_FFAimed"sv);
-		//const auto MagEffChilledToTheBone_FFTarget = Data::ModObject<RE::EffectSetting>("MagEffChilledToTheBone_FFTarget"sv);
-		const auto MagEffPiercingCold_concAimed = Data::ModObject<RE::EffectSetting>("MagEffPiercingCold_concAimed"sv);
-		const auto MagEffPiercingCold_FFAimed = Data::ModObject<RE::EffectSetting>("MagEffPiercingCold_FFAimed"sv);
-		const auto MagEffFrostborn_concAimed = Data::ModObject<RE::EffectSetting>("MagEffFrostborn_concAimed"sv);
-		const auto MagEffFrostborn_FFAimed = Data::ModObject<RE::EffectSetting>("MagEffFrostborn_FFAimed"sv);
-
-		auto spells = dataHandler->GetFormArray<SpellItem>();
-
-		for (auto* spell : spells)
+	//------------------------------------------------------------------------
+	void Destruction::ProcessMagicEffectAdded_DES(RE::Actor* a_target, RE::Actor* a_caster, RE::ActiveEffect* a_effect, RE::SpellItem* a_spell)
+	{
+		auto magEff = a_effect->GetBaseObject();
+		
+		if (magEff->HasKeyword(KeywordMagicEffectMainFire))
 		{
-			if (!spell) continue;
-			auto effs = spell->effects;
-			for (auto* eff : effs)
+			logger::info("{} was hit by a fire spell: {}"sv, a_target->GetName(), a_spell->GetName());
+			if (a_caster->HasPerk(PerkCatchFire))
 			{
-				if (!eff) continue;
-
-				auto magEff = eff->baseEffect;
-				if (!magEff) continue;
-
-				//Cache the magic effects that are "main" effects for valid frost spells
-				bool isValid = false;
-				if (magEff->HasKeyword(KeywordMagicEffectMainFrost))
-				{
-					mainMagEffs_frost.insert(magEff);
-					isValid = true;
-					logger::info("PatchFrostSpells() - Found a magEff marked with keyword PoE_K_MagicEffectMainFrost"sv);
-				}
-				else
-				{
-					//TODO
-				}
-				if (!isValid) continue;
-
-				/*
-				//Frost spells MUST be set to NoDispelOnDeath and have a taper duration > 0
-				//Otherwise, Frostborn won't trigger on death
-				if (magEff->data.taperDuration <= 0.0 || magEff->data.taperWeight <= 0.0)
-				{
-					magEff->data.taperDuration = 0.1;
-					magEff->data.taperWeight = 0.01;
-					magEff->data.taperCurve = 1.0;
-					logger::info("     > Updated taper settings: duration={}, weight={}, curve={}"sv, magEff->data.taperDuration, magEff->data.taperWeight, magEff->data.taperCurve);
-				}
-				if (!magEff->data.flags.all(RE::EffectSetting::EffectSettingData::Flag::kNoDeathDispel))
-				{
-					magEff->data.flags.set(RE::EffectSetting::EffectSettingData::Flag::kNoDeathDispel);
-					logger::info("     > Set NoDeathDispel flag: "sv, magEff->data.flags.all(RE::EffectSetting::EffectSettingData::Flag::kNoDeathDispel) ? "True" : "False");
-				}
-				*/
-
-				//Add secondary effects to spell
-				RE::EffectSetting* magEffChilledToTheBone = nullptr;
-				RE::EffectSetting* magEffPiercingCold = nullptr;
-				RE::EffectSetting* magEffFrostborn = nullptr;
-
-				auto castingType = magEff->data.castingType;
-				auto deliveryType = magEff->data.delivery;
-
-				if (castingType == RE::MagicSystem::CastingType::kConcentration && deliveryType == RE::MagicSystem::Delivery::kAimed)
-				{
-					magEffChilledToTheBone = MagEffChilledToTheBone_concAimed;
-					magEffPiercingCold = MagEffPiercingCold_concAimed;
-					magEffFrostborn = MagEffFrostborn_concAimed;
-				}
-				else if (castingType == RE::MagicSystem::CastingType::kFireAndForget && deliveryType == RE::MagicSystem::Delivery::kAimed)
-				{
-					magEffChilledToTheBone = MagEffChilledToTheBone_FFAimed;
-					magEffPiercingCold = MagEffPiercingCold_FFAimed;
-					magEffFrostborn = MagEffFrostborn_FFAimed;
-				}
-
-				//ChilledToTheBone
-				if (magEffChilledToTheBone && AddMagicEffect(spell, magEffChilledToTheBone, 40.0, eff))
-				{
-					logger::info("     > Added secondary effect ChilledToTheBone to the spell {}"sv, spell->GetName());
-				}
-
-				//PiercingCold
-				float mag = eff->effectItem.magnitude * 0.25;
-				if (magEffPiercingCold && AddMagicEffect(spell, magEffPiercingCold, mag, eff))
-				{
-					logger::info("     > Added secondary effect PiercingCold to the spell {}"sv, spell->GetName());
-				}
-
-				//Frostborn
-				if (magEffFrostborn && AddMagicEffect(spell, magEffFrostborn, 0.0, eff))
-				{
-					logger::info("     > Added secondary effect Frostborn to the spell {}"sv, spell->GetName());
-				}
+				
+				//logger::info("     > Caster has CatchFire, extended spell duration"sv, a_target->GetName());
 			}
+		}
 
+		//Prevent frostborn stacking
+		if (magEff->HasKeyword(KeywordMagicEffectMainFrost) && a_caster->HasPerk(PerkFrostborn))
+		{
+			Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordFrostborn);
+		}
+
+		//Prevent Immolate stacking
+		if (magEff->HasKeyword(KeywordMagicEffectMainFire) && a_caster->HasPerk(PerkImmolate))
+		{
+			Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordImmolate);
 		}
 
 	}
-
 }

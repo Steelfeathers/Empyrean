@@ -6,6 +6,7 @@
 #include "Alteration.h"
 #include "OneHanded.h"
 #include "TwoHanded.h"
+#include "Destruction.h"
 
 #include "RE/Offset.h"
 #include <xbyak/xbyak.h>
@@ -24,7 +25,7 @@ namespace Hooks {
 
 		InstallUpdateHook();
 		InstallCombatHitHook();
-		//InstallMagicEffectAddedHooks();
+		InstallMagicEffectAddedHooks();
 		result &= LightArmor::InstallHooks();
 		result &= Unarmed::InstallHooks();
 		result &= Pickpocket::InstallHooks();
@@ -62,6 +63,30 @@ namespace Hooks {
 		TwoHanded::ProcessCombatHit(a_this, a_hitData);
 	}
 
+	void ProcessSpellsForPatching()
+	{
+		Destruction::LoadData();
+
+		RE::TESDataHandler* dataHandler = RE::TESDataHandler::GetSingleton();
+		if (!dataHandler) return;
+
+		auto spells = dataHandler->GetFormArray<RE::SpellItem>();
+		for (auto* spell : spells)
+		{
+			if (!spell) continue;
+			auto effs = spell->effects;
+			for (auto* eff : effs)
+			{
+				if (!eff) continue;
+
+				auto magEff = eff->baseEffect;
+				if (!magEff) continue;
+
+				Destruction::PatchSpell(spell, eff, magEff);
+			}
+		}
+	}
+
 	void InstallMagicEffectAddedHooks()
 	{
 		auto target = REL::Relocation<std::uintptr_t>(RE::Character::VTABLE[4]);
@@ -94,25 +119,25 @@ namespace Hooks {
 		auto magEff = a_effect->GetBaseObject();
 		if (!magEff) return;
 
-		if (targetActor->IsPlayerRef())
-			logger::info("ProcessMagicEffectAdded({}) for Player"sv, magEff->GetFormID());
-		else
-			logger::info("ProcessMagicEffectAdded({}) for {}"sv, magEff->GetFormID(), targetActor->GetFormID());
+		//if (targetActor->IsPlayerRef())
+		//	logger::info("ProcessMagicEffectAdded({}) for Player"sv, magEff->GetFormID());
+		//else
+		//	logger::info("ProcessMagicEffectAdded({}) for {}"sv, magEff->GetFormID(), targetActor->GetFormID());
 
 		//Do we need to check for effects that were absorbed? Or do they just not get added to begin with?
 
 		//Skip if no caster, or if caster isn't an actor
-		auto caster = a_effect->GetCasterActor();
+		auto caster = a_effect->GetCasterActor().get();
 		if (!caster)
 		{
-			logger::info("     > Skipped: Caster is missing or not an actor"sv);
+			//logger::info("     > Skipped: Caster is missing or not an actor"sv);
 			return;
 		}
 
 		auto magItem = a_effect->spell;
 		if (!magItem)
 		{
-			logger::info("     > Skipped: MagEff is not from a MagicItem (spell, enchantment, etc)"sv);
+			//logger::info("     > Skipped: MagEff is not from a MagicItem (spell, enchantment, etc)"sv);
 			return;
 		}
 		
@@ -121,13 +146,13 @@ namespace Hooks {
 		auto spell = magItem->As<RE::SpellItem>();
 		if (!spell)
 		{
-			logger::info("     > Skipped: MagEff is not from a SpellItem"sv);
+			//logger::info("     > Skipped: MagEff is not from a SpellItem"sv);
 			return;
 		}
 		auto spellType = spell->GetSpellType();
 		if (spellType != RE::MagicSystem::SpellType::kSpell)
 		{
-			logger::info("     > Skipped: SpellItem is not 'Spell' type"sv);
+			//logger::info("     > Skipped: SpellItem is not 'Spell' type"sv);
 			return;
 		}
 
@@ -135,15 +160,19 @@ namespace Hooks {
 		auto highestCostMagEff = spell->GetCostliestEffectItem();
 		if (!highestCostMagEff)
 		{
-			logger::info("     > Skipped: Could not find highest cost effect for spell...?"sv);
+			//logger::info("     > Skipped: Could not find highest cost effect for spell...?"sv);
 			return;
 		}
 		if (magEff != highestCostMagEff->baseEffect)
 		{
-			logger::info("     > Skipped: MagEff is not the highest cost effect for this spell"sv);
+			//logger::info("     > Skipped: MagEff is not the highest cost effect for this spell"sv);
 			return;
 		}
 
+		Destruction::ProcessMagicEffectAdded_DES(targetActor, caster, a_effect, spell);
+		return;
+
+		/*
 		//Check for spell casting perk
 		//TODO Handle hazard spells like WallOfFire -> grab their enchantment from their hazard
 		if (!spell->data.castingPerk)
@@ -171,6 +200,7 @@ namespace Hooks {
 			return;
 		}
 
-		//auto keywordMagicDamageFire = RE::TESForm::LookupByEditorID("MagicDamageFire");
+		
+		*/
 	}
 }

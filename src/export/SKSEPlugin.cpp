@@ -18,7 +18,8 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 
 		SECTION_SEPARATOR;
 		Hooks::Pickpocket::InstallActivateHook();
-		Hooks::Destruction::PatchFrostSpells();
+		//Hooks::Destruction::PatchFrostSpells();
+		Hooks::ProcessSpellsForPatching();
 
 		SECTION_SEPARATOR;
 		logger::info("Finished startup tasks, enjoy your game!"sv);
