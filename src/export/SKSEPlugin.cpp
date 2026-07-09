@@ -1,4 +1,5 @@
 #include "Hooks/Pickpocket.h"
+#include "hooks/Destruction.h"
 #include "Data/ModObjectManager.h"
 #include "Hooks/Hooks.h"
 #include "Papyrus/Papyrus.h"
@@ -17,6 +18,7 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 
 		SECTION_SEPARATOR;
 		Hooks::Pickpocket::InstallActivateHook();
+		Hooks::Destruction::PatchFrostSpells();
 
 		SECTION_SEPARATOR;
 		logger::info("Finished startup tasks, enjoy your game!"sv);

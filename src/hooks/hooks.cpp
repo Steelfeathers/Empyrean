@@ -24,6 +24,7 @@ namespace Hooks {
 
 		InstallUpdateHook();
 		InstallCombatHitHook();
+		//InstallMagicEffectAddedHooks();
 		result &= LightArmor::InstallHooks();
 		result &= Unarmed::InstallHooks();
 		result &= Pickpocket::InstallHooks();
@@ -49,17 +50,127 @@ namespace Hooks {
 	void InstallCombatHitHook()
 	{
 		auto& trampoline = SKSE::GetTrampoline();
-		//REL::ID(38627)
 		REL::Relocation<std::uintptr_t> target{ RE::Offset::Actor::CombatHit, 0x4A8 };
-		_originalCall = trampoline.write_call<5>(target.address(), &ProcessCombatHit);
+		_CombatHit = trampoline.write_call<5>(target.address(), &ProcessCombatHit);
 	}
 
 	void ProcessCombatHit(RE::Actor* a_this, RE::HitData* a_hitData)
 	{
-		_originalCall(a_this, a_hitData);
+		_CombatHit(a_this, a_hitData);
 		Unarmed::ProcessCombatHit(a_this, a_hitData);
 		OneHanded::ProcessCombatHit(a_this, a_hitData);
 		TwoHanded::ProcessCombatHit(a_this, a_hitData);
 	}
 
+	void InstallMagicEffectAddedHooks()
+	{
+		auto target = REL::Relocation<std::uintptr_t>(RE::Character::VTABLE[4]);
+		_MagicEffectAddedActor = target.write_vfunc(0x08, &ProcessMagicEffectAddedActor);
+
+		target = REL::Relocation<std::uintptr_t>(RE::PlayerCharacter::VTABLE[4]);
+		_MagicEffectAddedPlayer = target.write_vfunc(0x08, &ProcessMagicEffectAddedPlayer);
+		
+	}
+
+	void ProcessMagicEffectAddedActor(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect)
+	{
+		_MagicEffectAddedActor(a_target, a_effect);
+		ProcessMagicEffectAdded(a_target, a_effect);
+	}
+	void ProcessMagicEffectAddedPlayer(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect)
+	{
+		
+		_MagicEffectAddedPlayer(a_target, a_effect);
+		ProcessMagicEffectAdded(a_target, a_effect);
+	}
+
+	void ProcessMagicEffectAdded(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect)
+	{
+		//Skip if no target, target isn't an actor, or if we can't fetch the base magEff for some reason
+		if (!a_target || !a_effect) return;
+		if (!a_target->MagicTargetIsActor()) return;
+		auto targetActor = a_target->GetTargetAsActor();
+		if (!targetActor) return;
+		auto magEff = a_effect->GetBaseObject();
+		if (!magEff) return;
+
+		if (targetActor->IsPlayerRef())
+			logger::info("ProcessMagicEffectAdded({}) for Player"sv, magEff->GetFormID());
+		else
+			logger::info("ProcessMagicEffectAdded({}) for {}"sv, magEff->GetFormID(), targetActor->GetFormID());
+
+		//Do we need to check for effects that were absorbed? Or do they just not get added to begin with?
+
+		//Skip if no caster, or if caster isn't an actor
+		auto caster = a_effect->GetCasterActor();
+		if (!caster)
+		{
+			logger::info("     > Skipped: Caster is missing or not an actor"sv);
+			return;
+		}
+
+		auto magItem = a_effect->spell;
+		if (!magItem)
+		{
+			logger::info("     > Skipped: MagEff is not from a MagicItem (spell, enchantment, etc)"sv);
+			return;
+		}
+		
+		//Exclude everything that isn't a spell - SpellMastery lesser power just casts the spell remotely
+		//TODO If SpellMastery is changed so that the spell itself is altered via DLL to become a lesser power, this check will need to update
+		auto spell = magItem->As<RE::SpellItem>();
+		if (!spell)
+		{
+			logger::info("     > Skipped: MagEff is not from a SpellItem"sv);
+			return;
+		}
+		auto spellType = spell->GetSpellType();
+		if (spellType != RE::MagicSystem::SpellType::kSpell)
+		{
+			logger::info("     > Skipped: SpellItem is not 'Spell' type"sv);
+			return;
+		}
+
+		//Only trigger for highest cost effect
+		auto highestCostMagEff = spell->GetCostliestEffectItem();
+		if (!highestCostMagEff)
+		{
+			logger::info("     > Skipped: Could not find highest cost effect for spell...?"sv);
+			return;
+		}
+		if (magEff != highestCostMagEff->baseEffect)
+		{
+			logger::info("     > Skipped: MagEff is not the highest cost effect for this spell"sv);
+			return;
+		}
+
+		//Check for spell casting perk
+		//TODO Handle hazard spells like WallOfFire -> grab their enchantment from their hazard
+		if (!spell->data.castingPerk)
+		{
+			logger::info("     > Skipped: Parent spell has no casting perk"sv);
+			return;
+		}
+		
+		//Check for empty name, description, or set HideInUI
+		auto magEffName = magEff->GetName();
+		if (!magEffName || magEffName == "")
+		{
+			logger::info("     > Skipped: MagEff is the highest cost effect but has no name, probably isn't from a spell we should patch"sv);
+			return;
+		}
+		auto magEffDesc = magEff->magicItemDescription;
+		if (magEffDesc.empty())
+		{
+			logger::info("     > Skipped: MagEff is the highest cost effect but has no description, probably isn't from a spell we should patch"sv);
+			return;
+		}
+		if (magEff->data.flags.all(RE::EffectSetting::EffectSettingData::Flag::kHideInUI))
+		{
+			logger::info("     > Skipped: MagEff is the highest cost effect but is HideInUI, probably isn't from a spell we should patch"sv);
+			return;
+		}
+
+		//auto keywordMagicDamageFire = RE::TESForm::LookupByEditorID("MagicDamageFire");
+	}
 }

@@ -8,7 +8,13 @@ namespace Hooks {
 	inline static REL::Relocation<decltype(&Update)> _Update;
 
 	static void InstallCombatHitHook();
-	//static void ProcessCombatHit(const RE::HitData& a_hitData);
 	static void ProcessCombatHit(RE::Actor* a_this, RE::HitData* a_hitData);
-	static inline REL::Relocation<decltype(&ProcessCombatHit)> _originalCall;
+	static inline REL::Relocation<decltype(&ProcessCombatHit)> _CombatHit;
+
+	static void InstallMagicEffectAddedHooks();
+	static void ProcessMagicEffectAddedActor(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect);
+	static void ProcessMagicEffectAddedPlayer(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect);
+	static void ProcessMagicEffectAdded(RE::MagicTarget* a_target, RE::ActiveEffect* a_effect);
+	static inline REL::Relocation<decltype(&ProcessMagicEffectAddedActor)> _MagicEffectAddedActor;
+	static inline REL::Relocation<decltype(&ProcessMagicEffectAddedPlayer)> _MagicEffectAddedPlayer;
 }

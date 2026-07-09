@@ -26,3 +26,14 @@ Keyword Property KeywordWeapBleed Auto
 Keyword Property KeywordWeapBladed1H auto
 Keyword Property KeywordWeapBladed2H auto
 Spell Property SpellBleedOut auto
+
+Keyword Property KeywordMagicEffectMainFrost Auto
+MagicEffect Property MagEffChilledToTheBone_concAimed Auto
+MagicEffect Property MagEffChilledToTheBone_FFAimed Auto
+MagicEffect Property MagEffChilledToTheBone_FFTarget Auto
+MagicEffect Property MagEffPiercingCold_concAimed Auto
+MagicEffect Property MagEffPiercingCold_FFAimed Auto
+MagicEffect Property MagEffPiercingCold_FFTarget Auto
+MagicEffect Property MagEffFrostborn_concAimed Auto
+MagicEffect Property MagEffFrostborn_FFAimed Auto
+MagicEffect Property MagEffFrostborn_FFTarget Auto
