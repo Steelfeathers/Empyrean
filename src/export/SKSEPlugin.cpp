@@ -6,6 +6,7 @@
 #include "Serialization/Serde.h"
 #include "Settings/INI/INISettings.h"
 #include "Settings/JSON/JSONSettings.h"
+#include "Hooks/Destruction.h"
 
 static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 {
@@ -18,8 +19,8 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 
 		SECTION_SEPARATOR;
 		Hooks::Pickpocket::InstallActivateHook();
-		//Hooks::Destruction::PatchFrostSpells();
-		Hooks::ProcessSpellsForPatching();
+		Hooks::Destruction::LoadData();
+		//Hooks::ProcessSpellsForPatching();
 
 		SECTION_SEPARATOR;
 		logger::info("Finished startup tasks, enjoy your game!"sv);

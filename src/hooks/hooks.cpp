@@ -63,9 +63,10 @@ namespace Hooks {
 		TwoHanded::ProcessCombatHit(a_this, a_hitData);
 	}
 
+	/*
 	void ProcessSpellsForPatching()
 	{
-		Destruction::LoadData();
+		//Destruction::LoadData();
 
 		RE::TESDataHandler* dataHandler = RE::TESDataHandler::GetSingleton();
 		if (!dataHandler) return;
@@ -86,6 +87,7 @@ namespace Hooks {
 			}
 		}
 	}
+	*/
 
 	void InstallMagicEffectAddedHooks()
 	{
@@ -127,11 +129,11 @@ namespace Hooks {
 		//Do we need to check for effects that were absorbed? Or do they just not get added to begin with?
 
 		//Skip if no caster, or if caster isn't an actor
-		auto caster = a_effect->GetCasterActor().get();
+		auto caster = a_effect->GetCasterActor() ? a_effect->GetCasterActor().get() : nullptr;
 		if (!caster)
 		{
 			//logger::info("     > Skipped: Caster is missing or not an actor"sv);
-			return;
+		//	return;
 		}
 
 		auto magItem = a_effect->spell;
@@ -140,7 +142,11 @@ namespace Hooks {
 			//logger::info("     > Skipped: MagEff is not from a MagicItem (spell, enchantment, etc)"sv);
 			return;
 		}
+
+		Destruction::ProcessMagicEffectAdded_DES(targetActor, caster, a_effect, magItem);
+		return;
 		
+		/*
 		//Exclude everything that isn't a spell - SpellMastery lesser power just casts the spell remotely
 		//TODO If SpellMastery is changed so that the spell itself is altered via DLL to become a lesser power, this check will need to update
 		auto spell = magItem->As<RE::SpellItem>();
@@ -156,6 +162,7 @@ namespace Hooks {
 			return;
 		}
 
+	
 		//Only trigger for highest cost effect
 		auto highestCostMagEff = spell->GetCostliestEffectItem();
 		if (!highestCostMagEff)
@@ -171,6 +178,7 @@ namespace Hooks {
 
 		Destruction::ProcessMagicEffectAdded_DES(targetActor, caster, a_effect, spell);
 		return;
+		*/
 
 		/*
 		//Check for spell casting perk

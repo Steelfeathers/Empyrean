@@ -29,6 +29,17 @@ namespace Hooks
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFContact;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFTarget;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_FFTargetLoc;
+
+	inline RE::BGSPerk* PerkForceOfNature;
+	inline RE::SpellItem* SpellForceOfNature_FireIce;
+	inline RE::SpellItem* SpellForceOfNature_IceShock;
+	inline RE::SpellItem* SpellForceOfNature_ShockFire;
+	inline RE::BGSKeyword* KeywordSpellChainFire;
+	inline RE::BGSKeyword* KeywordSpellChainFrost;
+	inline RE::BGSKeyword* KeywordSpellChainShock;
+	inline RE::BGSKeyword* KeywordSpellChainCooldown_FireIce;
+	inline RE::BGSKeyword* KeywordSpellChainCooldown_IceShock;
+	inline RE::BGSKeyword* KeywordSpellChainCooldown_ShockFire;
 	
 	inline RE::BGSKeyword* MagicDamageFire;
 	inline RE::BGSKeyword* MagicDamageFrost;
@@ -38,14 +49,15 @@ namespace Hooks
 	//------------------------------------------------------------------------
 	void Destruction::LoadData()
 	{
-		//auto keywordMagicDamageFrost = RE::TESForm::LookupByEditorID("MagicDamageFrost")->As<RE::BGSKeyword>();
+		//Cache the data needed for patching spells, to prevent needing to look it up for every spell we loop through
 
-		//Fire keywords and reference secondary effects
-		KeywordMagicEffectMainFire = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFire"sv);
-		PerkCatchFire = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_CatchFire"sv);
+		//Grab keywords and secondary magEffs for Fire spells
+		//KeywordMagicEffectMainFire = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFire"sv);
+		//PerkCatchFire = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_CatchFire"sv);
 		KeywordImmolate = Data::ModObject<RE::BGSKeyword>("PoE_K_Immolate"sv);
-		PerkImmolate = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Immolate"sv);
+		//PerkImmolate = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Immolate"sv);
 
+		/*
 		const auto refSpellFire_ConcAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFire_ConcAimed"sv);
 		for (auto* refEff : refSpellFire_ConcAimed->effects)
 		{
@@ -56,13 +68,15 @@ namespace Hooks
 		{
 			secondaryMagEffsFire_FFAimed.insert(refEff);
 		}
+		*/
 
-		//Frost keywords and reference secondary effects
-		KeywordMagicEffectMainFrost = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFrost"sv);
-		KeywordPiercingCold = Data::ModObject<RE::BGSKeyword>("PoE_K_PiercingCold"sv);
+		//Grab keywords and secondary magEffs for Frost spells
+		//KeywordMagicEffectMainFrost = Data::ModObject<RE::BGSKeyword>("PoE_K_MagicEffectMainFrost"sv);
+		//KeywordPiercingCold = Data::ModObject<RE::BGSKeyword>("PoE_K_PiercingCold"sv);
 		KeywordFrostborn = Data::ModObject<RE::BGSKeyword>("PoE_K_Frostborn"sv);
-		PerkFrostborn = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Frostborn"sv);
+		//PerkFrostborn = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_Frostborn"sv);
 		
+		/*
 		const auto refSpellFrost_ConcAimed = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES__SecondaryEffectsFrost_ConcAimed"sv);
 		for (auto* refEff : refSpellFrost_ConcAimed->effects)
 		{
@@ -93,8 +107,22 @@ namespace Hooks
 		{
 			secondaryMagEffsFrost_FFTargetLoc.insert(refEff);
 		}
+
+		//Grab the ForceOfNature spells
+		PerkForceOfNature = Data::ModObject<RE::BGSPerk>("PoE_PERK_DES_ForceOfNature"sv);
+		SpellForceOfNature_FireIce = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES_SpellChaining_FireIce"sv);
+		SpellForceOfNature_IceShock = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES_SpellChaining_IceShock"sv);
+		SpellForceOfNature_ShockFire = Data::ModObject<RE::SpellItem>("PoE_SPELL_DES_SpellChaining_ShockFire"sv);
+		KeywordSpellChainFire = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_Fire"sv);
+		KeywordSpellChainFrost = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_Frost"sv);
+		KeywordSpellChainShock = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_Shock"sv);
+		KeywordSpellChainCooldown_FireIce = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_FireFrost_cool"sv);
+		KeywordSpellChainCooldown_IceShock = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_FrostElectric_cool"sv);
+		KeywordSpellChainCooldown_ShockFire = Data::ModObject<RE::BGSKeyword>("PoE_K_SpellChaining_ShockFire_cool"sv);
+		*/
 	}
 
+	/*
 	void Destruction::PatchSpell(RE::SpellItem* spell, RE::Effect* eff, RE::EffectSetting* magEff)
 	{
 		if (magEff->HasKeyword(KeywordMagicEffectMainFire))
@@ -153,6 +181,8 @@ namespace Hooks
 			float mag = refEff->effectItem.magnitude;
 			AddMagicEffect(spell, refEff->baseEffect, mag, eff);
 		}
+		//auto* newMagEff = SplitMagicEffect(magEff);
+
 		logger::info("Patched fire spell {}"sv, spell->GetName());
 	}
 
@@ -218,42 +248,51 @@ namespace Hooks
 		}
 		return false;
 	}
-
-	/*
-	bool Destruction::SplitMagicEffect(RE::EffectSetting* origEffect)
-	{
-		auto baseEff = new RE::EffectSetting();
-		baseEff->Copy(origEffect);
-		
-	}
 	*/
-
+	
 	//------------------------------------------------------------------------
-	void Destruction::ProcessMagicEffectAdded_DES(RE::Actor* a_target, RE::Actor* a_caster, RE::ActiveEffect* a_effect, RE::SpellItem* a_spell)
+	void Destruction::ProcessMagicEffectAdded_DES(RE::Actor* a_target, RE::Actor* a_caster, RE::ActiveEffect* a_effect, RE::MagicItem* a_spell)
 	{
 		auto magEff = a_effect->GetBaseObject();
 		
-		if (magEff->HasKeyword(KeywordMagicEffectMainFire))
+		//If hit with a fire spell...
+		if (magEff->HasKeyword(KeywordImmolate))
+		//if (magEff->HasKeyword(KeywordMagicEffectMainFire))
 		{
-			logger::info("{} was hit by a fire spell: {}"sv, a_target->GetName(), a_spell->GetName());
-			if (a_caster->HasPerk(PerkCatchFire))
+			//logger::info("{} was hit by a fire spell: {}"sv, a_target->GetName(), a_spell->GetName());
+
+			//Prevent Immolate stacking
+			//if (a_caster->HasPerk(PerkImmolate))
 			{
-				
-				//logger::info("     > Caster has CatchFire, extended spell duration"sv, a_target->GetName());
+				logger::info("Preventing Immolate stacking..."sv);
+				Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordImmolate);
+			}
+			/*
+			//Try to apply ForceOfNature spell combos
+			if (a_caster->HasPerk(PerkForceOfNature))
+			{
+				//Fire/Ice
+				if (a_target->HasMagicEffectWithKeyword(KeywordSpellChainFrost, nullptr) && !a_target->HasMagicEffectWithKeyword(KeywordSpellChainCooldown_FireIce, nullptr))
+				{
+					a_caster->GetMagicCaster(RE::MagicSystem::CastingSource::kInstant)->CastSpellImmediate(SpellForceOfNature_FireIce, false, a_target, 1.0f, false, 0.0f, a_caster);
+					logger::info("   > Applied ForceOfNature Fire/Ice spell!"sv);
+				}
+			}
+			*/
+		}
+
+		//If hit with a frost spell...
+		if (magEff->HasKeyword(KeywordFrostborn))
+		//if (magEff->HasKeyword(KeywordMagicEffectMainFrost))
+		{
+			//Prevent frostborn stacking
+			//if (a_caster->HasPerk(PerkFrostborn))
+			{
+				logger::info("Preventing Frostborn stacking..."sv);
+				Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordFrostborn);
 			}
 		}
 
-		//Prevent frostborn stacking
-		if (magEff->HasKeyword(KeywordMagicEffectMainFrost) && a_caster->HasPerk(PerkFrostborn))
-		{
-			Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordFrostborn);
-		}
-
-		//Prevent Immolate stacking
-		if (magEff->HasKeyword(KeywordMagicEffectMainFire) && a_caster->HasPerk(PerkImmolate))
-		{
-			Utils::MagicUtils::RemoveOldestEffectStackWithKeyword(a_target, KeywordImmolate);
-		}
 
 	}
 }
