@@ -7,6 +7,7 @@
 #include "Settings/INI/INISettings.h"
 #include "Settings/JSON/JSONSettings.h"
 #include "Hooks/Destruction.h"
+#include "Hooks/Smithing.h"
 
 static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 {
@@ -19,8 +20,9 @@ static void MessageEventCallback(SKSE::MessagingInterface::Message* a_msg)
 
 		SECTION_SEPARATOR;
 		Hooks::Pickpocket::InstallActivateHook();
-		Hooks::Destruction::LoadData();
+		//Hooks::Destruction::LoadData();
 		//Hooks::ProcessSpellsForPatching();
+		Hooks::Smithing::LoadData();
 
 		SECTION_SEPARATOR;
 		logger::info("Finished startup tasks, enjoy your game!"sv);

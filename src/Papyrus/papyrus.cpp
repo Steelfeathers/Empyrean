@@ -1,5 +1,6 @@
 #include "papyrus.h"
 #include "Hooks/Pickpocket.h"
+#include "hooks/Smithing.h"
 #include "Utils/ArmorUtils.h"
 
 namespace Papyrus
@@ -18,6 +19,12 @@ namespace Papyrus
 	std::vector< RE::TESObjectARMO*> GetAllEquippedArmor(STATIC_ARGS, RE::Actor* a_actor)
 	{
 		return Utils::ArmorUtils::GetEquippedArmor(a_actor);
+	}
+
+	//----------------------------------------------------------------------------------------------------
+	static void CreateStasisCubeFromAutomaton(STATIC_ARGS, RE::Actor* automaton)
+	{
+		Hooks::Smithing::CreateStasisCubeFromAutomaton(automaton);
 	}
 
 	//----------------------------------------------------------------------------------------------------
@@ -71,6 +78,8 @@ namespace Papyrus
 		BIND(UpdateRacesAllowPickpocket);
 		logger::info("  >Binding GetAllEquippedArmor..."sv);
 		BIND(GetAllEquippedArmor);
+		logger::info("  >Binding CreateStasisCubeFromAutomaton..."sv);
+		BIND(CreateStasisCubeFromAutomaton);
 	}
 
 	bool RegisterFunctions(VM* a_vm) {

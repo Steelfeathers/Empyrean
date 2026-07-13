@@ -25,7 +25,7 @@ namespace Hooks {
 
 		InstallUpdateHook();
 		InstallCombatHitHook();
-		InstallMagicEffectAddedHooks();
+		//InstallMagicEffectAddedHooks();
 		result &= LightArmor::InstallHooks();
 		result &= Unarmed::InstallHooks();
 		result &= Pickpocket::InstallHooks();

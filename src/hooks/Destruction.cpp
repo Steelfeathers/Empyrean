@@ -8,8 +8,9 @@ using namespace RE;
 
 namespace Hooks
 {
-	inline RE::BGSKeyword* KeywordMagicEffectMainFire;
+	//inline RE::BGSKeyword* KeywordMagicEffectMainFire;
 	inline RE::BGSKeyword* KeywordImmolate;
+	/*
 	inline RE::BGSPerk* PerkCatchFire;
 	inline RE::BGSPerk* PerkImmolate;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_ConcAimed;
@@ -18,10 +19,12 @@ namespace Hooks
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFContact;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFTarget;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFire_FFTargetLoc;
+	*/
 
-	inline RE::BGSKeyword* KeywordMagicEffectMainFrost;
-	inline RE::BGSKeyword* KeywordPiercingCold;
+	//inline RE::BGSKeyword* KeywordMagicEffectMainFrost;
+	//inline RE::BGSKeyword* KeywordPiercingCold;
 	inline RE::BGSKeyword* KeywordFrostborn;
+	/*
 	inline RE::BGSPerk* PerkFrostborn;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_ConcAimed;
 	inline std::unordered_set<RE::Effect*> secondaryMagEffsFrost_ConcTarget;
@@ -44,11 +47,13 @@ namespace Hooks
 	inline RE::BGSKeyword* MagicDamageFire;
 	inline RE::BGSKeyword* MagicDamageFrost;
 	inline RE::BGSKeyword* MagicDamageShock;
+	*/
 	
 	//------------------------------------------------------------------------
 	//------------------------------------------------------------------------
 	void Destruction::LoadData()
 	{
+
 		//Cache the data needed for patching spells, to prevent needing to look it up for every spell we loop through
 
 		//Grab keywords and secondary magEffs for Fire spells
