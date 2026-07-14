@@ -62,13 +62,13 @@ namespace Hooks
 		loaded = true;
 	}
 
-	void Smithing::CreateStasisCubeFromAutomaton(RE::Actor* automaton)
+	bool Smithing::CreateStasisCubeFromAutomaton(RE::Actor* automaton)
 	{
-		if (!loaded) return;
+		if (!loaded) return false;
 
 		if (!automaton) {
 			logger::info("Warning! CreateStasisCubeFromAutomaton() failed, automaton is null");
-			return;
+			return false;
 		}
 		
 		logger::info("CreateStasisCubeFromAutomaton() - {}"sv, automaton->GetDisplayFullName());
@@ -80,7 +80,8 @@ namespace Hooks
 		//Check if this is a Fabricant (handled differently)
 		if (automaton->HasKeyword(KeywordFabricant))
 		{
-			logger::info("  > Target is Fabricant"sv);
+			auto frmId = automaton->GetActorBase()->formID;
+			//logger::info("  > Target is Fabricant, ActorBase formID: <{}>"sv, frmId);
 
 			int indexActor = 0;
 			for (auto* form : ListFabricantActors->forms)
@@ -88,23 +89,25 @@ namespace Hooks
 				const auto actorBase = form->As<RE::TESNPC>();
 				if (!actorBase)
 				{
-					logger::info("  > Warning! ActorBase is null?");
+					logger::info("  > Warning! ActorBase in list is null or incorrect type");
+					continue;
 				}
-				if (automaton->GetActorBase()->formID == actorBase->formID) {
+				//logger::info("  > Checking actor list index {}, actorBase formID: <{}>"sv, indexActor, actorBase->formID);
+				if (frmId == actorBase->formID) {
 					break;
 				}
 				indexActor += 1;
 			}
-			if (indexActor >= ListSpawnRaceMagEffs->forms.size()) {
+			if (indexActor >= ListSpawnRaceMagEffsFabricant->forms.size()) {
 				logger::info("  > Warning! Could not find this automaton in the fabricant list, aborting...");
-				return;
+				return false;
 			}
 
 			//Grab the spawn magEff for this automaton and add it to the effects list
 			RE::EffectSetting* automatonMagEff = ListSpawnRaceMagEffsFabricant->forms[indexActor]->As<RE::EffectSetting>();
 			if (!automatonMagEff) {
-				logger::info("  > Warning! The spawn magic effect for this fabricant is missing or incorrect somehow, aborting...");
-				return;
+				logger::info("  > Warning! The spawn magic effect for this fabricant is missing or incorrect type, aborting...");
+				return false;
 			}
 
 			RE::Effect eff;
@@ -124,7 +127,7 @@ namespace Hooks
 			CreatePotionFromEffects(automatonMagEff, effects, "Clutter\\Dwemer\\DweLexiconCubeCorrupt01.nif", weight, value + 50.0);
 			logger::info("  > Successfully created a stasis cube!"sv);
 
-			return; //Don't do anything else with Fabricants
+			return true; //Don't do anything else with Fabricants
 		}
 		
 
@@ -140,7 +143,7 @@ namespace Hooks
 		}
 		if (indexRace >= ListSpawnRaceMagEffs->forms.size()) {
 			logger::info("  > Warning! This automaton does not have one of the race keywords in the list, aborting...");
-			return;
+			return false;
 		}
 
 		//Grab the spawn magEff for this automaton and add it to the effects list
@@ -157,7 +160,7 @@ namespace Hooks
 
 		if (!automatonMagEff) {
 			logger::info("  > Warning! The spawn magic effect for this automaton is missing or incorrect somehow, aborting...");
-			return;
+			return false;
 		}
 
 		RE::Effect eff;
@@ -223,6 +226,7 @@ namespace Hooks
 		//Pass in the effects to create the potion
 		CreatePotionFromEffects(automatonMagEff, effects, cubeModel, weight, value + 100.0);
 		logger::info("  > Successfully created a stasis cube!"sv);
+		return true;
 	}
 
 	void Smithing::CreatePotionFromEffects(RE::EffectSetting* mainSpawnMagEff, RE::BSTArray<RE::Effect> effects, std::string modelName, float weight, float value)
@@ -235,8 +239,6 @@ namespace Hooks
 		std::string name = std::format("Automaton Stasis Cube: {}", mainSpawnMagEff->GetName());
 		out.get()->SetFullName(name.c_str());
 		out.get()->weight = weight;
-		//out.get()->data.flags.reset(RE::AlchemyItem::AlchemyFlag::kCostOverride);
-		//out.get()->data.costOverride = value;
 		out->SetModel(modelName.c_str());
 		out.get()->AddKeyword(KeywordCraftingAutomaton);
 		out.get()->AddKeyword(KeywordCraftingSmithingForge);

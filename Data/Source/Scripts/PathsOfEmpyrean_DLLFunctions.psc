@@ -11,4 +11,4 @@ function UpdateRacesAllowPickpocket() global native
 ;-----------------------------------------------------------------------
 armor[] function GetAllEquippedArmor(Actor a_actor) global native
 
-function CreateStasisCubeFromAutomaton(Actor automaton) global native
+bool function CreateStasisCubeFromAutomaton(Actor automaton) global native

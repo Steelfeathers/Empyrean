@@ -22,9 +22,9 @@ namespace Papyrus
 	}
 
 	//----------------------------------------------------------------------------------------------------
-	static void CreateStasisCubeFromAutomaton(STATIC_ARGS, RE::Actor* automaton)
+	static bool CreateStasisCubeFromAutomaton(STATIC_ARGS, RE::Actor* automaton)
 	{
-		Hooks::Smithing::CreateStasisCubeFromAutomaton(automaton);
+		return Hooks::Smithing::CreateStasisCubeFromAutomaton(automaton);
 	}
 
 	//----------------------------------------------------------------------------------------------------
