@@ -3,27 +3,6 @@
 
 namespace Hooks
 {
-	inline RE::BGSKeyword* KeywordCraftingAutomaton;
-	inline RE::BGSKeyword* KeywordCraftingSmithingForge;
-	inline RE::BGSKeyword* KeywordVendorItemClutter;
-	inline RE::BGSKeyword* KeywordVendorItemTool;
-	inline RE::BGSKeyword* KeywordAutomaton;
-	inline RE::BGSKeyword* KeywordFabricant;
-	inline RE::BGSKeyword* KeywordAether;
-	inline RE::BGSListForm* ListRaceKeywords;
-	inline RE::BGSListForm* ListRaceWeights;
-	inline RE::BGSListForm* ListFabricantActors;
-	inline RE::BGSListForm* ListFabricantWeights;
-	inline RE::BGSListForm* ListActiveUpgradeMagEffs;
-	inline RE::BGSListForm* ListSpawnRaceMagEffs;
-	inline RE::BGSListForm* ListSpawnRaceMagEffsAether;
-	inline RE::BGSListForm* ListSpawnRaceMagEffsFabricant;
-	inline RE::BGSListForm* ListSpawnUpgradeMagEffs;
-	inline RE::EffectSetting* MagEffSpawnUpgradeStart;
-	inline RE::EffectSetting* MagEffSpawnUpgradeSpacer;
-	inline RE::EffectSetting* MagEffSpawnUpgradeEnd;
-	inline bool loaded;
-
 	void Smithing::LoadData()
 	{
 		KeywordCraftingAutomaton = Data::ModObject<RE::BGSKeyword>("IWP_K_DwarvenAutomaton"sv);
@@ -50,7 +29,7 @@ namespace Hooks
 		MagEffSpawnUpgradeSpacer = Data::ModObject<RE::EffectSetting>("PoE_MGEF_SMITH_SpawnDwarvenAutomaton_Upgrade_spacer"sv);
 		MagEffSpawnUpgradeEnd = Data::ModObject<RE::EffectSetting>("PoE_MGEF_SMITH_SpawnDwarvenAutomaton_Upgrade_end"sv);
 
-		if (!KeywordCraftingSmithingForge || !KeywordFabricant || !KeywordAether ||
+		if (!KeywordCraftingAutomaton || !KeywordCraftingSmithingForge || !KeywordFabricant || !KeywordAether ||
 			!ListRaceKeywords || !ListRaceWeights || !ListSpawnRaceMagEffs || !ListSpawnRaceMagEffsAether || !ListFabricantActors || !ListFabricantWeights ||
 			!ListSpawnRaceMagEffsFabricant || !ListSpawnUpgradeMagEffs || !ListActiveUpgradeMagEffs ||
 			!MagEffSpawnUpgradeStart || !MagEffSpawnUpgradeSpacer || !MagEffSpawnUpgradeEnd) {
@@ -124,7 +103,7 @@ namespace Hooks
 			}
 
 			//Pass in the effects to create the potion
-			CreatePotionFromEffects(automatonMagEff, effects, "Clutter\\Dwemer\\DweLexiconCubeCorrupt01.nif", weight, value + 50.0);
+			CreatePotionFromEffects(automatonMagEff, effects, "Clutter\\Dwemer\\DweLexiconCubeCorrupt01.nif", weight);
 			logger::info("  > Successfully created a stasis cube!"sv);
 
 			return true; //Don't do anything else with Fabricants
@@ -153,13 +132,18 @@ namespace Hooks
 		//Different spawn magEff and cube model if Aether version
 		if (automaton->HasKeyword(KeywordAether))
 		{
+			if (indexRace >= ListSpawnRaceMagEffsAether->forms.size())
+			{
+				logger::info("  > Warning! This automaton is marked as an Aether version but its spawn magEff is missing from list, aborting...");
+				return false;
+			}
 			automatonMagEff = ListSpawnRaceMagEffsAether->forms[indexRace]->As<RE::EffectSetting>();
 			cubeModel = "Clutter\\Dwemer\\DweLexiconCubeRunes01.nif";
 			logger::info("  > Target is Aetherium version"sv);
 		}
 
 		if (!automatonMagEff) {
-			logger::info("  > Warning! The spawn magic effect for this automaton is missing or incorrect somehow, aborting...");
+			logger::info("  > Warning! The spawn magic effect for this automaton is missing or incorrect type, aborting...");
 			return false;
 		}
 
@@ -175,7 +159,18 @@ namespace Hooks
 		for (auto* form : ListActiveUpgradeMagEffs->forms)
 		{
 			const auto activeUpgradeMagEff = form->As<RE::EffectSetting>();
+			if (!activeUpgradeMagEff)
+			{
+				logger::info("  > Warning! An active upgrade magEff in the list is missing or incorrect type, won't be able to apply its upgrade"sv);
+				continue;
+			}
+
 			if (automaton->HasMagicEffect(activeUpgradeMagEff)) {
+				if (indexUpgrade >= ListSpawnUpgradeMagEffs->forms.size()) {
+					logger::info("  > Warning! An upgrade spawn magEff is missing from its list, won't be able to apply the upgrade"sv);
+					continue;
+				}
+
 				RE::EffectSetting* spawnUpgradeMagEff = ListSpawnUpgradeMagEffs->forms[indexUpgrade]->As<RE::EffectSetting>();
 				if (!spawnUpgradeMagEff) continue;
 
@@ -224,12 +219,12 @@ namespace Hooks
 		}
 		
 		//Pass in the effects to create the potion
-		CreatePotionFromEffects(automatonMagEff, effects, cubeModel, weight, value + 100.0);
+		CreatePotionFromEffects(automatonMagEff, effects, cubeModel, weight);
 		logger::info("  > Successfully created a stasis cube!"sv);
 		return true;
 	}
 
-	void Smithing::CreatePotionFromEffects(RE::EffectSetting* mainSpawnMagEff, RE::BSTArray<RE::Effect> effects, std::string modelName, float weight, float value)
+	void Smithing::CreatePotionFromEffects(RE::EffectSetting* mainSpawnMagEff, RE::BSTArray<RE::Effect> effects, std::string modelName, float weight)
 	{
 		RE::CreatedObjPtr<RE::AlchemyItem> out;
 
